@@ -3,6 +3,9 @@
   "name": "Live2D Waifu",
   "version": "1.0",
   "description": "Display a Live2D waifu on any webpage.",
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -17,7 +20,8 @@
         "*.js",
         "*.css",
         "*.json",
-        "models/*"
+        "models/*",
+        "chunk/*"
       ],
       "matches": ["<all_urls>"]
     }

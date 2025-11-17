@@ -52,22 +52,39 @@ function loadExternalResource(url, type) {
   window.Image.prototype = OriginalImage.prototype;
   // Load waifu.css and waifu-tips.js
   // 加载 waifu.css 和 waifu-tips.js
-  await Promise.all([
-    loadExternalResource(chrome.runtime.getURL('waifu.css'), 'css'),
-    loadExternalResource(chrome.runtime.getURL('waifu-tips.js'), 'js')
-  ]);
+  console.log('[Live2D Extension] Starting resource loading...');
+  console.log('[Live2D Extension] Extension ID:', chrome.runtime.id);
+  console.log('[Live2D Extension] Base URL:', chrome.runtime.getURL(''));
+  
+  try {
+    await Promise.all([
+      loadExternalResource(chrome.runtime.getURL('waifu.css'), 'css'),
+      loadExternalResource(chrome.runtime.getURL('waifu-tips.js'), 'js')
+    ]);
+    console.log('[Live2D Extension] Resources loaded successfully');
+  } catch (error) {
+    console.error('[Live2D Extension] Failed to load resources:', error);
+    throw error;
+  }
   
   // Wait for initWidget to be available (it's defined in waifu-tips.js)
   // 等待 initWidget 函数可用（它在 waifu-tips.js 中定义）
+  console.log('[Live2D Extension] Waiting for initWidget...');
   let retries = 0;
   while (typeof window.initWidget === 'undefined' && retries < 50) {
     await new Promise(resolve => setTimeout(resolve, 100));
     retries++;
+    if (retries % 10 === 0) {
+      console.log(`[Live2D Extension] Still waiting for initWidget... (${retries}/50)`);
+    }
   }
   
   if (typeof window.initWidget === 'undefined') {
+    console.error('[Live2D Extension] initWidget not found after 5 seconds');
+    console.error('[Live2D Extension] Available window properties:', Object.keys(window).filter(k => k.includes('init') || k.includes('widget') || k.includes('waifu')));
     throw new Error('initWidget function not found. waifu-tips.js may not have loaded correctly.');
   }
+  console.log('[Live2D Extension] initWidget found!');
   
   // For detailed usage of configuration options, see README.en.md
   // 配置选项的具体用法见 README.md
@@ -84,20 +101,42 @@ function loadExternalResource(url, type) {
     }
     
     console.log('[Live2D Extension] Initializing with models:', modelList.models);
-    window.initWidget({
-      waifuPath: chrome.runtime.getURL('waifu-tips.json'),
-      // Use local models instead of CDN
-      models: modelList.models.map(path => ({
-        paths: [chrome.runtime.getURL(path)],
+    const modelPaths = modelList.models.map(path => {
+      const fullPath = chrome.runtime.getURL(path);
+      console.log(`[Live2D Extension] Model path: ${path} -> ${fullPath}`);
+      return {
+        paths: [fullPath],
         message: ''
-      })),
-      cubism2Path: chrome.runtime.getURL('live2d.min.js'),
-      cubism5Path: chrome.runtime.getURL('live2d.min.js'), // Use same file for both, or remove if not needed
-      tools: ['switch-model', 'switch-texture', 'photo', 'info', 'quit'],
-      logLevel: 'info', // Changed to 'info' for better debugging
-      drag: false,
+      };
     });
+    
+    const config = {
+      waifuPath: chrome.runtime.getURL('waifu-tips.json'),
+      models: modelPaths,
+      cubism2Path: chrome.runtime.getURL('live2d.min.js'),
+      cubism5Path: chrome.runtime.getURL('live2d.min.js'),
+      tools: ['switch-model', 'switch-texture', 'photo', 'info', 'quit'],
+      logLevel: 'info',
+      drag: false,
+    };
+    
+    console.log('[Live2D Extension] Config:', JSON.stringify(config, null, 2));
+    console.log('[Live2D Extension] Calling initWidget...');
+    
+    window.initWidget(config);
+    
     console.log('[Live2D Extension] initWidget called successfully');
+    
+    // Check if waifu element was created
+    setTimeout(() => {
+      const waifuEl = document.getElementById('waifu');
+      if (waifuEl) {
+        console.log('[Live2D Extension] ✅ #waifu element created');
+        console.log('[Live2D Extension] Element styles:', window.getComputedStyle(waifuEl).display);
+      } else {
+        console.warn('[Live2D Extension] ⚠️ #waifu element not found after initWidget');
+      }
+    }, 1000);
   } catch (error) {
     console.error('[Live2D Extension] Failed to initialize:', error);
     console.error('[Live2D Extension] Error stack:', error.stack);

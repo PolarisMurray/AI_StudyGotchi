@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Live2D Waifu",
+  "version": "1.0",
+  "description": "Display a Live2D waifu on any webpage.",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["autoload.js"],
+      "css": ["waifu.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "*.js",
+        "*.css",
+        "*.json",
+        "models/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
+

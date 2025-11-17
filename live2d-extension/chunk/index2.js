@@ -39,6 +39,45 @@ export class AppDelegate {
     }
     
     console.log('[Live2D] WebGL context initialized');
+    
+    // Add click and hover event listeners to trigger Live2D events
+    this.setupEventListeners();
+  }
+  
+  setupEventListeners() {
+    if (!this.canvas) return;
+    
+    // Click event - trigger tapbody event
+    this.canvas.addEventListener('click', (e) => {
+      console.log('[Live2D] Canvas clicked, triggering tapbody event');
+      window.dispatchEvent(new CustomEvent('live2d:tapbody', {
+        detail: { x: e.offsetX, y: e.offsetY }
+      }));
+    });
+    
+    // Mouse move event - trigger hoverbody event when mouse is over canvas
+    let isHovering = false;
+    this.canvas.addEventListener('mouseenter', () => {
+      isHovering = true;
+    });
+    
+    this.canvas.addEventListener('mouseleave', () => {
+      isHovering = false;
+    });
+    
+    this.canvas.addEventListener('mousemove', (e) => {
+      if (isHovering) {
+        // Only trigger hover event occasionally to avoid spam
+        if (!this.lastHoverTime || Date.now() - this.lastHoverTime > 100) {
+          window.dispatchEvent(new CustomEvent('live2d:hoverbody', {
+            detail: { x: e.offsetX, y: e.offsetY }
+          }));
+          this.lastHoverTime = Date.now();
+        }
+      }
+    });
+    
+    console.log('[Live2D] Event listeners set up for click and hover');
   }
 
   async changeModel(modelPath) {
@@ -115,6 +154,13 @@ export class AppDelegate {
       
       console.log('[Live2D] Model loaded successfully');
       console.log('[Live2D] Note: Actual rendering requires Live2D SDK implementation');
+      
+      // Ensure waifu element is visible
+      const waifuEl = document.getElementById('waifu');
+      if (waifuEl && !waifuEl.classList.contains('waifu-active')) {
+        waifuEl.classList.add('waifu-active');
+        console.log('[Live2D] Waifu element activated');
+      }
       
     } catch (error) {
       console.error('[Live2D] Failed to load model:', error);

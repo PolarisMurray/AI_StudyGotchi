@@ -9,7 +9,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["autoload.js"],
+      "js": ["live2d.min.js", "autoload.js"],
       "css": ["waifu.css"],
       "run_at": "document_idle"
     }

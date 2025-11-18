@@ -1,0 +1,22 @@
+扩展文件夹位置
+==============
+
+完整路径：
+/Users/alex/github/AI_StudyGotchi/live2d-extension
+
+在 Finder 中打开：
+1. 打开 Finder
+2. 按 Cmd + Shift + G
+3. 输入：/Users/alex/github/AI_StudyGotchi/live2d-extension
+4. 按回车
+
+或者在终端打开：
+cd /Users/alex/github/AI_StudyGotchi/live2d-extension
+open .
+
+加载到 Chrome：
+1. chrome://extensions/
+2. 开启"开发者模式"
+3. 点击"加载已解压的扩展程序"
+4. 选择这个文件夹：/Users/alex/github/AI_StudyGotchi/live2d-extension
+

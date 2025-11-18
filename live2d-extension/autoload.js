@@ -8,34 +8,6 @@
 // Use Chrome Extension runtime URL for local resources
 const live2d_path = chrome.runtime.getURL("");
 
-// Method to encapsulate asynchronous resource loading
-// 封装异步加载资源的方法
-function loadExternalResource(url, type) {
-  return new Promise((resolve, reject) => {
-    let tag;
-
-    if (type === 'css') {
-      tag = document.createElement('link');
-      tag.rel = 'stylesheet';
-      tag.href = url;
-    }
-    else if (type === 'js') {
-      tag = document.createElement('script');
-      // Check if the script needs to be loaded as a module
-      // For waifu-tips.js which uses ES6 exports, we need type="module"
-      if (url.includes('waifu-tips.js')) {
-        tag.type = 'module';
-      }
-      tag.src = url;
-    }
-    if (tag) {
-      tag.onload = () => resolve(url);
-      tag.onerror = () => reject(url);
-      document.head.appendChild(tag);
-    }
-  });
-}
-
 (async () => {
   // If you are concerned about display issues on mobile devices, you can use screen.width to determine whether to load
   // 如果担心手机上显示效果不佳，可以根据屏幕宽度来判断是否加载
@@ -50,22 +22,20 @@ function loadExternalResource(url, type) {
     return img;
   };
   window.Image.prototype = OriginalImage.prototype;
-  // Load waifu.css and waifu-tips.js
-  // 加载 waifu.css 和 waifu-tips.js
-  console.log('[Live2D Extension] Starting resource loading...');
+  console.log('[Live2D Extension] Starting initialization...');
   console.log('[Live2D Extension] Extension ID:', chrome.runtime.id);
   console.log('[Live2D Extension] Base URL:', chrome.runtime.getURL(''));
+  console.log('[Live2D Extension] Loading waifu-tips.js module...');
   
   try {
-    await Promise.all([
-      loadExternalResource(chrome.runtime.getURL('waifu.css'), 'css'),
-      loadExternalResource(chrome.runtime.getURL('waifu-tips.js'), 'js')
-    ]);
-    console.log('[Live2D Extension] Resources loaded successfully');
+    await import(chrome.runtime.getURL('waifu-tips.js'));
+    console.log('[Live2D Extension] waifu-tips.js module loaded');
   } catch (error) {
-    console.error('[Live2D Extension] Failed to load resources:', error);
+    console.error('[Live2D Extension] Failed to load waifu-tips.js module:', error);
     throw error;
   }
+  
+  console.log('[Live2D Extension] Waiting for waifu-tips.js to initialize...');
   
   // Wait for initWidget to be available (it's defined in waifu-tips.js)
   // 等待 initWidget 函数可用（它在 waifu-tips.js 中定义）
@@ -117,7 +87,7 @@ function loadExternalResource(url, type) {
       cubism5Path: chrome.runtime.getURL('live2d.min.js'),
       tools: ['switch-model', 'switch-texture', 'photo', 'info', 'quit'],
       logLevel: 'info',
-      drag: false,
+    drag: false,
     };
     
     console.log('[Live2D Extension] Config:', JSON.stringify(config, null, 2));

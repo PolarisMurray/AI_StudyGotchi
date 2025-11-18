@@ -2,8 +2,6 @@
 
 <div align="center">
 
-[![Language](https://img.shields.io/badge/Language-Swift-orange.svg)](https://swift.org)
-[![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20iPadOS-blue.svg)](https://www.apple.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **Your Live2D AI Study Buddy**
